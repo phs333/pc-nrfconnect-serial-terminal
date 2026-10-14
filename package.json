@@ -1,11 +1,11 @@
 {
     "name": "pc-nrfconnect-serial-terminal",
-    "version": "1.6.5",
-    "description": "Terminal emulator for serial port connections",
-    "displayName": "Serial Terminal",
+    "version": "1.7.0",
+    "description": "Terminal emulator with configurable macro buttons for serial port connections",
+    "displayName": "Serial Terminal (with Macros)",
     "repository": {
         "type": "git",
-        "url": "https://github.com/nordicsemi/pc-nrfconnect-serial-terminal.git"
+        "url": "https://github.com/phs333/pc-nrfconnect-serial-terminal.git"
     },
     "author": "Nordic Semiconductor ASA",
     "license": "SEE LICENSE IN LICENSE",
@@ -49,5 +49,9 @@
         "xterm-addon-fit": "^0.8.0",
         "xterm-for-react": "github:NordicPlayground/xterm-for-react"
     },
-    "prettier": "@nordicsemiconductor/pc-nrfconnect-shared/config/prettier.config.js"
+    "prettier": "@nordicsemiconductor/pc-nrfconnect-shared/config/prettier.config.js",
+    "resolutions": {
+        "@types/react": "17.0.55",
+        "@types/react-dom": "17.0.19"
+    }
 }

@@ -27,6 +27,7 @@ import {
     getWriteLogToFile,
 } from '../../features/terminal/terminalSlice';
 import useFitAddon from '../../hooks/useFitAddon';
+import { MacroBar } from './MacroBar';
 
 import 'xterm/css/xterm.css';
 import './terminal.scss';
@@ -399,69 +400,87 @@ export default ({
     }, [xtermRef, lineMode, handleUserInputShellMode, cmdLine]);
 
     return (
-        <div ref={resizeRef} style={{ height: '100%' }}>
+        <div
+            ref={resizeRef}
+            style={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+            }}
+        >
             {lineMode && (
-                <div className="commandPrompt">
-                    <div className="input-group">
-                        <input
-                            ref={lineModeInputRef}
-                            value={historyLine != null ? historyLine : cmdLine}
-                            type="text"
-                            placeholder="Type and press Enter to send"
-                            onChange={({ target }) => {
-                                resetHistoryScroll();
-                                setHistoryLine(undefined);
-                                setCmdLine(target.value);
-                            }}
-                            onKeyDown={event => {
-                                if (event.key === 'Enter') {
-                                    if (historyLine) {
-                                        handleUserInputLineMode(historyLine);
-                                        if (!clearOnSend) {
-                                            setCmdLine(historyLine);
-                                        }
-                                        setHistoryLine(undefined);
-                                        resetHistoryScroll();
-                                    } else {
-                                        handleUserInputLineMode(cmdLine);
-                                    }
+                <>
+                    <MacroBar
+                        onExecuteCommand={handleUserInputLineMode}
+                        connected={Boolean(serialPort)}
+                    />
+                    <div className="commandPrompt">
+                        <div className="input-group">
+                            <input
+                                ref={lineModeInputRef}
+                                value={
+                                    historyLine != null ? historyLine : cmdLine
                                 }
-                                if (event.key === 'ArrowUp') {
-                                    // This is needed to prevent the cursor to go to start
-                                    event.preventDefault();
+                                type="text"
+                                placeholder="Type and press Enter to send"
+                                onChange={({ target }) => {
+                                    resetHistoryScroll();
+                                    setHistoryLine(undefined);
+                                    setCmdLine(target.value);
+                                }}
+                                onKeyDown={event => {
+                                    if (event.key === 'Enter') {
+                                        if (historyLine) {
+                                            handleUserInputLineMode(
+                                                historyLine,
+                                            );
+                                            if (!clearOnSend) {
+                                                setCmdLine(historyLine);
+                                            }
+                                            setHistoryLine(undefined);
+                                            resetHistoryScroll();
+                                        } else {
+                                            handleUserInputLineMode(cmdLine);
+                                        }
+                                    }
+                                    if (event.key === 'ArrowUp') {
+                                        // This is needed to prevent the cursor to go to start
+                                        event.preventDefault();
 
-                                    const history = scrollBack(cmdLine);
-                                    if (history != null) {
+                                        const history = scrollBack(cmdLine);
+                                        if (history != null) {
+                                            setHistoryLine(history);
+                                        }
+                                    }
+                                    if (event.key === 'ArrowDown') {
+                                        const history = scrollForward(cmdLine);
                                         setHistoryLine(history);
                                     }
-                                }
-                                if (event.key === 'ArrowDown') {
-                                    const history = scrollForward(cmdLine);
-                                    setHistoryLine(history);
-                                }
 
-                                if (event.ctrlKey && event.key === 'u') {
-                                    resetHistoryScroll();
-                                    setCmdLine('');
-                                    setHistoryLine(undefined);
-                                }
-                            }}
-                        />
+                                    if (event.ctrlKey && event.key === 'u') {
+                                        resetHistoryScroll();
+                                        setCmdLine('');
+                                        setHistoryLine(undefined);
+                                    }
+                                }}
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => handleUserInputLineMode(cmdLine)}
+                        >
+                            Send
+                        </button>
                     </div>
-                    <button
-                        type="button"
-                        onClick={() => handleUserInputLineMode(cmdLine)}
-                    >
-                        Send
-                    </button>
-                </div>
+                </>
             )}
             <div
-                style={
-                    lineMode
-                        ? { height: 'calc(100% - 38px)' }
-                        : { height: '100%' }
-                }
+                style={{
+                    flex: '1 1 0',
+                    minHeight: 0,
+                    position: 'relative',
+                    height: lineMode ? undefined : '100%',
+                }}
             >
                 <XTerm
                     onKey={v => {

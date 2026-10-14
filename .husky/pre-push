@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+export PATH="/c/Program Files/nodejs:$PATH"
 npm run check && npm t

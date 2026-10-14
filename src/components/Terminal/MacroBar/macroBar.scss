@@ -1,0 +1,356 @@
+/*
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+ */
+
+@use 'sass:color';
+@import '~@nordicsemiconductor/pc-nrfconnect-shared/styles';
+@import '../Terminal.module.scss';
+
+.macro-bar {
+    display: flex;
+    align-items: center;
+    background-color: $gray-900;
+    border-bottom: 1px solid $gray-800;
+    padding: 4px 8px;
+    gap: 8px;
+    user-select: none;
+    font-family: inherit;
+
+    .macro-bar-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+        color: $gray-400;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .macro-list {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        flex-grow: 1;
+        padding-bottom: 2px;
+
+        &::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: $gray-700;
+            border-radius: 2px;
+        }
+    }
+
+    .macro-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background-color: $gray-800;
+        color: $gray-50;
+        border: 1px solid $gray-700;
+        border-radius: 3px;
+        padding: 4px 8px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+
+        &:hover:not(:disabled) {
+            background-color: $gray-700;
+            border-color: $gray-500;
+        }
+
+        &:active:not(:disabled) {
+            background-color: $gray-600;
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        &.macro-btn-active {
+            border-color: $nordic-blue;
+            background-color: rgba(0, 169, 206, 0.2);
+            animation: pulse-border 1s infinite alternate;
+        }
+
+        .macro-color-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .macro-edit-trigger {
+            margin-left: 4px;
+            font-size: 10px;
+            opacity: 0.4;
+            transition: opacity 0.15s ease;
+            cursor: pointer;
+
+            &:hover {
+                opacity: 1;
+                color: $nordic-blue;
+            }
+        }
+    }
+
+    .macro-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+
+        .macro-action-btn {
+            background-color: transparent;
+            border: 1px solid $gray-700;
+            color: $gray-300;
+            border-radius: 3px;
+            padding: 3px 7px;
+            font-size: 11px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+
+            &:hover:not(:disabled) {
+                background-color: $gray-800;
+                color: $nordic-blue;
+                border-color: $nordic-blue;
+            }
+
+            &:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    .macro-running-indicator {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: $nordic-blue;
+        background-color: rgba(0, 169, 206, 0.1);
+        border: 1px solid rgba(0, 169, 206, 0.3);
+        padding: 3px 8px;
+        border-radius: 3px;
+
+        .stop-btn {
+            background-color: $red;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+
+            &:hover {
+                background-color: color.adjust($red, $lightness: -10%);
+            }
+        }
+    }
+}
+
+@keyframes pulse-border {
+    from {
+        border-color: rgba(0, 169, 206, 0.4);
+    }
+    to {
+        border-color: rgba(0, 169, 206, 1);
+    }
+}
+
+/* Modal styles */
+.macro-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.macro-modal {
+    background-color: $gray-900;
+    color: $gray-50;
+    border: 1px solid $gray-700;
+    border-radius: 6px;
+    width: 520px;
+    max-width: 90vw;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+
+    .macro-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid $gray-800;
+        font-weight: 600;
+        font-size: 14px;
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: $gray-400;
+            font-size: 18px;
+            cursor: pointer;
+            line-height: 1;
+
+            &:hover {
+                color: $gray-100;
+            }
+        }
+    }
+
+    .macro-modal-body {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            label {
+                font-size: 12px;
+                font-weight: 600;
+                color: $gray-200;
+            }
+
+            .form-hint {
+                font-size: 11px;
+                color: $gray-400;
+            }
+
+            input[type='text'],
+            input[type='number'] {
+                background-color: $gray-800;
+                border: 1px solid $gray-700;
+                color: $gray-50;
+                padding: 6px 10px;
+                border-radius: 4px;
+                font-size: 13px;
+
+                &:focus {
+                    outline: none;
+                    border-color: $nordic-blue;
+                }
+            }
+
+            textarea {
+                background-color: $gray-800;
+                border: 1px solid $gray-700;
+                color: #80cbc4;
+                font-family: 'Consolas', 'Courier New', monospace;
+                font-size: 12px;
+                line-height: 1.4;
+                padding: 8px 10px;
+                border-radius: 4px;
+                resize: vertical;
+                height: 140px;
+
+                &:focus {
+                    outline: none;
+                    border-color: $nordic-blue;
+                }
+            }
+        }
+
+        .color-picker-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+
+            .color-swatch {
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                cursor: pointer;
+                border: 2px solid transparent;
+                transition: transform 0.1s ease;
+
+                &:hover {
+                    transform: scale(1.15);
+                }
+
+                &.selected {
+                    border-color: white;
+                    box-shadow: 0 0 0 1px $nordic-blue;
+                }
+            }
+        }
+    }
+
+    .macro-modal-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-top: 1px solid $gray-800;
+
+        .footer-right {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.15s ease;
+        }
+
+        .btn-primary {
+            background-color: $nordic-blue;
+            color: white;
+
+            &:hover {
+                background-color: color.adjust($nordic-blue, $lightness: -8%);
+            }
+        }
+
+        .btn-secondary {
+            background-color: $gray-700;
+            color: $gray-200;
+
+            &:hover {
+                background-color: $gray-600;
+            }
+        }
+
+        .btn-danger {
+            background-color: transparent;
+            color: $red;
+            border: 1px solid $red;
+
+            &:hover {
+                background-color: rgba(244, 67, 54, 0.15);
+            }
+        }
+    }
+}
