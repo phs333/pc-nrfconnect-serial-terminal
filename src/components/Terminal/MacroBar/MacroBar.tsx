@@ -310,8 +310,8 @@ export const MacroBar: React.FC<MacroBarProps> = ({
                         onClick={onToggleEspLog}
                         title={
                             espLogHighlight
-                                ? 'ESP Log & ANSI Highlighting: ON (Click to disable)'
-                                : 'ESP Log & ANSI Highlighting: OFF (Click to enable)'
+                                ? 'Log Level Highlighting: ON (Click to disable)'
+                                : 'Log Level Highlighting: OFF (Click to enable)'
                         }
                         style={
                             espLogHighlight
@@ -323,7 +323,7 @@ export const MacroBar: React.FC<MacroBarProps> = ({
                                 : undefined
                         }
                     >
-                        ⚡ ESP Log: {espLogHighlight ? 'ON' : 'OFF'}
+                        ⚡ Log Colors: {espLogHighlight ? 'ON' : 'OFF'}
                     </button>
                 )}
             </div>

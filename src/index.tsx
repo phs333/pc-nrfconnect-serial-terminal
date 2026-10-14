@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { getCurrentWindow } from '@electron/remote';
 import {
     App,
     render,
@@ -17,6 +18,12 @@ import DocumentationSections from './components/DocumentationSection';
 import Terminal from './components/Terminal/Main';
 import TerminalSidePanel from './components/Terminal/SidePanel';
 import TerminalSettings from './features/settings';
+
+try {
+    getCurrentWindow()?.setBackgroundColor('#23282d');
+} catch {
+    // Ignore in non-electron or test environments
+}
 
 telemetry.enableTelemetry();
 

@@ -204,15 +204,15 @@ export default () => {
                     />
                 )}
             </Group>
-            <Group collapsible heading="ANSI Colors & Logs">
+            <Group collapsible heading="Log Colors & Formatting">
                 <Toggle
-                    title="Automatically colorize ESP-IDF (E, W, I, D, V), Zephyr, and panic crash dumps with vibrant ANSI colors"
+                    title="Automatically colorize standard log levels (Error, Warn, Info, Debug), tags, and system crash dumps with vibrant ANSI colors"
                     isToggled={espLogHighlight}
                     onToggle={value => {
                         setEspLogHighlightState(value);
                         setEspLogHighlight(value);
                     }}
-                    label="ESP-IDF & Zephyr Log Highlighting"
+                    label="Colorize Log Levels (Info, Warn, Error, Debug)"
                 />
                 <Toggle
                     title="Automatically convert line feeds (\n) to carriage return + line feed (\r\n) to prevent staircase indentation in microcontroller logs"

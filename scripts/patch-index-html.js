@@ -7,18 +7,32 @@
 const fs = require('fs');
 const path = require('path');
 
-const distHtmlPath = path.resolve(__dirname, '..', 'dist', 'index.html');
+const distDir = path.resolve(__dirname, '..', 'dist');
+const distHtmlPath = path.join(distDir, 'index.html');
+const distBootstrapCssPath = path.join(distDir, 'bootstrap.css');
+const distBundleCssPath = path.join(distDir, 'bundle.css');
 
+// 1. Patch dist/index.html
 const htmlContent = `<!DOCTYPE html>
-<html lang="en" style="background-color: #23282d;">
+<html lang="en" style="background-color: #23282d; background: #23282d;">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Serial Terminal</title>
+    <script>
+        try {
+            const { getCurrentWindow } = require('@electron/remote');
+            const win = getCurrentWindow();
+            if (win) {
+                win.setBackgroundColor('#23282d');
+            }
+        } catch (e) {}
+    </script>
     <style>
-        html, body {
+        html, body, #webapp {
             background-color: #23282d !important;
+            background: #23282d !important;
             color: #d8d8d8;
             margin: 0;
             padding: 0;
@@ -29,6 +43,10 @@ const htmlContent = `<!DOCTYPE html>
         }
         #webapp {
             height: 100%;
+        }
+        #app-loader {
+            border: 8px solid rgba(0, 169, 206, 0.2) !important;
+            border-left: 8px solid #00a9ce !important;
         }
         .initial-splash {
             display: flex;
@@ -86,7 +104,7 @@ const htmlContent = `<!DOCTYPE html>
     </script>
     <script src="bundle.js" defer></script>
 </head>
-<body style="background-color: #23282d !important;">
+<body style="background-color: #23282d !important; background: #23282d !important;">
     <div id="webapp">
         <div class="initial-splash">
             <div class="initial-spinner"></div>
@@ -102,3 +120,43 @@ fs.writeFileSync(distHtmlPath, htmlContent, 'utf8');
 console.log(
     'Successfully patched dist/index.html with dark Nordic theme & instant splash screen.',
 );
+
+// 2. Patch dist/bootstrap.css
+const darkThemeOverrideCss = `/* Nordic Dark Theme Launcher Override */
+html, body, #webapp {
+  background-color: #23282d !important;
+  background: #23282d !important;
+  color: #eceff1 !important;
+}
+#app-loader {
+  border: 8px solid rgba(0, 169, 206, 0.2) !important;
+  border-left: 8px solid #00a9ce !important;
+}
+`;
+
+if (fs.existsSync(distBootstrapCssPath)) {
+    let bootstrapContent = fs.readFileSync(distBootstrapCssPath, 'utf8');
+    if (!bootstrapContent.includes('Nordic Dark Theme Launcher Override')) {
+        bootstrapContent = `${darkThemeOverrideCss}\n${bootstrapContent}`;
+    }
+    bootstrapContent = bootstrapContent.replace(
+        /body\s*\{([^}]*?)background-color:\s*#fff;([^}]*?)\}/g,
+        'body {$1background-color: #23282d;$2}',
+    );
+    fs.writeFileSync(distBootstrapCssPath, bootstrapContent, 'utf8');
+    console.log(
+        'Successfully patched dist/bootstrap.css to eliminate white flash and style app-loader.',
+    );
+}
+
+// 3. Patch dist/bundle.css
+if (fs.existsSync(distBundleCssPath)) {
+    let bundleContent = fs.readFileSync(distBundleCssPath, 'utf8');
+    if (!bundleContent.includes('Nordic Dark Theme Launcher Override')) {
+        bundleContent = `${darkThemeOverrideCss}\n${bundleContent}`;
+        fs.writeFileSync(distBundleCssPath, bundleContent, 'utf8');
+        console.log(
+            'Successfully patched dist/bundle.css with dark theme override.',
+        );
+    }
+}

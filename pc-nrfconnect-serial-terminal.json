@@ -5,7 +5,7 @@
     "latestVersion": "1.7.0",
     "versions": {
         "1.7.0": {
-            "shasum": "ddae74cf23ed0ee05f86ca9dbe694390d9d264dd",
+            "shasum": "b87dff56981c438cf665746035b24b09eaf929f2",
             "tarballUrl": "https://raw.githubusercontent.com/phs333/pc-nrfconnect-serial-terminal/main/packages/pc-nrfconnect-serial-terminal-1.7.0.tgz",
             "nrfutilModules": {
                 "device": ["2.19.3"]
