@@ -14,6 +14,11 @@ import { writeFile } from 'fs/promises';
 import { XTerm } from 'xterm-for-react';
 
 import {
+    getConvertEol,
+    getEspLogHighlight,
+    setEspLogHighlight,
+} from '../../app/store';
+import {
     resetHistoryScroll,
     scrollBack,
     scrollForward,
@@ -27,6 +32,7 @@ import {
     getWriteLogToFile,
 } from '../../features/terminal/terminalSlice';
 import useFitAddon from '../../hooks/useFitAddon';
+import { createEspLogStreamProcessor, TERMINAL_ANSI_THEME } from './ansiEspLog';
 import { MacroBar } from './MacroBar';
 
 import 'xterm/css/xterm.css';
@@ -68,6 +74,41 @@ export default ({
     const scrollback = useSelector(getScrollback);
     const writeLogToFile = useSelector(getWriteLogToFile);
     const dispatch = useDispatch();
+
+    const [espLogHighlight, setEspLogHighlightState] = useState(() =>
+        getEspLogHighlight(),
+    );
+    const [convertEol] = useState(() => getConvertEol());
+
+    const espLogHighlightRef = useRef(espLogHighlight);
+    useEffect(() => {
+        espLogHighlightRef.current = espLogHighlight;
+    }, [espLogHighlight]);
+
+    const streamProcessorRef = useRef<ReturnType<
+        typeof createEspLogStreamProcessor
+    > | null>(null);
+
+    useEffect(() => {
+        streamProcessorRef.current = createEspLogStreamProcessor(
+            (processedText: string) => {
+                xtermRef.current?.terminal.write(processedText);
+            },
+            () => espLogHighlightRef.current,
+        );
+
+        return () => {
+            streamProcessorRef.current?.flush();
+        };
+    }, []);
+
+    const handleToggleEspLog = useCallback(() => {
+        setEspLogHighlightState(prev => {
+            const next = !prev;
+            setEspLogHighlight(next);
+            return next;
+        });
+    }, []);
 
     const writeLineModeToXterm = (data: string) => {
         if (data.length === 1 && data.charCodeAt(0) === 12) return;
@@ -216,7 +257,19 @@ export default ({
     useEffect(
         () =>
             onData(data => {
-                if (data.length > 0) {
+                if (data.length === 0) return;
+
+                if (!espLogHighlightRef.current) {
+                    xtermRef.current?.terminal.write(data);
+                    return;
+                }
+
+                try {
+                    const text = new TextDecoder().decode(data, {
+                        stream: true,
+                    });
+                    streamProcessorRef.current?.write(text);
+                } catch {
                     xtermRef.current?.terminal.write(data);
                 }
             }),
@@ -277,10 +330,13 @@ export default ({
     }, [writeLogToFile, dispatch]);
 
     const terminalOptions = {
-        convertEol: false,
+        convertEol,
         theme: {
-            foreground: styles.terminalForeground,
-            background: styles.terminalBackground,
+            ...TERMINAL_ANSI_THEME,
+            foreground:
+                styles.terminalForeground || TERMINAL_ANSI_THEME.foreground,
+            background:
+                styles.terminalBackground || TERMINAL_ANSI_THEME.background,
         },
         disableStdin: lineMode, // Line mode user needs to use the input field not the terminal
         scrollback,
@@ -408,71 +464,71 @@ export default ({
                 flexDirection: 'column',
             }}
         >
+            <MacroBar
+                onExecuteCommand={
+                    lineMode
+                        ? handleUserInputLineMode
+                        : handleUserInputShellMode
+                }
+                connected={Boolean(serialPort)}
+                espLogHighlight={espLogHighlight}
+                onToggleEspLog={handleToggleEspLog}
+            />
             {lineMode && (
-                <>
-                    <MacroBar
-                        onExecuteCommand={handleUserInputLineMode}
-                        connected={Boolean(serialPort)}
-                    />
-                    <div className="commandPrompt">
-                        <div className="input-group">
-                            <input
-                                ref={lineModeInputRef}
-                                value={
-                                    historyLine != null ? historyLine : cmdLine
+                <div className="commandPrompt">
+                    <div className="input-group">
+                        <input
+                            ref={lineModeInputRef}
+                            value={historyLine != null ? historyLine : cmdLine}
+                            type="text"
+                            placeholder="Type and press Enter to send"
+                            onChange={({ target }) => {
+                                resetHistoryScroll();
+                                setHistoryLine(undefined);
+                                setCmdLine(target.value);
+                            }}
+                            onKeyDown={event => {
+                                if (event.key === 'Enter') {
+                                    if (historyLine) {
+                                        handleUserInputLineMode(historyLine);
+                                        if (!clearOnSend) {
+                                            setCmdLine(historyLine);
+                                        }
+                                        setHistoryLine(undefined);
+                                        resetHistoryScroll();
+                                    } else {
+                                        handleUserInputLineMode(cmdLine);
+                                    }
                                 }
-                                type="text"
-                                placeholder="Type and press Enter to send"
-                                onChange={({ target }) => {
-                                    resetHistoryScroll();
-                                    setHistoryLine(undefined);
-                                    setCmdLine(target.value);
-                                }}
-                                onKeyDown={event => {
-                                    if (event.key === 'Enter') {
-                                        if (historyLine) {
-                                            handleUserInputLineMode(
-                                                historyLine,
-                                            );
-                                            if (!clearOnSend) {
-                                                setCmdLine(historyLine);
-                                            }
-                                            setHistoryLine(undefined);
-                                            resetHistoryScroll();
-                                        } else {
-                                            handleUserInputLineMode(cmdLine);
-                                        }
-                                    }
-                                    if (event.key === 'ArrowUp') {
-                                        // This is needed to prevent the cursor to go to start
-                                        event.preventDefault();
+                                if (event.key === 'ArrowUp') {
+                                    // This is needed to prevent the cursor to go to start
+                                    event.preventDefault();
 
-                                        const history = scrollBack(cmdLine);
-                                        if (history != null) {
-                                            setHistoryLine(history);
-                                        }
-                                    }
-                                    if (event.key === 'ArrowDown') {
-                                        const history = scrollForward(cmdLine);
+                                    const history = scrollBack(cmdLine);
+                                    if (history != null) {
                                         setHistoryLine(history);
                                     }
+                                }
+                                if (event.key === 'ArrowDown') {
+                                    const history = scrollForward(cmdLine);
+                                    setHistoryLine(history);
+                                }
 
-                                    if (event.ctrlKey && event.key === 'u') {
-                                        resetHistoryScroll();
-                                        setCmdLine('');
-                                        setHistoryLine(undefined);
-                                    }
-                                }}
-                            />
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => handleUserInputLineMode(cmdLine)}
-                        >
-                            Send
-                        </button>
+                                if (event.ctrlKey && event.key === 'u') {
+                                    resetHistoryScroll();
+                                    setCmdLine('');
+                                    setHistoryLine(undefined);
+                                }
+                            }}
+                        />
                     </div>
-                </>
+                    <button
+                        type="button"
+                        onClick={() => handleUserInputLineMode(cmdLine)}
+                    >
+                        Send
+                    </button>
+                </div>
             )}
             <div
                 style={{

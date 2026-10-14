@@ -18,6 +18,8 @@ interface StoreSchema {
     maxNumberOfLinesInHistoryFile: number;
     scrollback: number;
     macros?: Macro[];
+    espLogHighlight?: boolean;
+    convertEol?: boolean;
 }
 
 const store = getPersistentStore<StoreSchema>({
@@ -61,3 +63,8 @@ export const setMaxNumberOfLinesInHistoryFile = (size: number) => {
 
 export const [getScrollback, setScrollback] = fromStore('scrollback', 1000);
 export const [getMacrosFromStore, setMacrosToStore] = fromStore('macros');
+export const [getEspLogHighlight, setEspLogHighlight] = fromStore(
+    'espLogHighlight',
+    true,
+);
+export const [getConvertEol, setConvertEol] = fromStore('convertEol', true);

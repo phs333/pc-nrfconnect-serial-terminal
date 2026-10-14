@@ -22,11 +22,15 @@ import './macroBar.scss';
 interface MacroBarProps {
     onExecuteCommand: (command: string) => void;
     connected: boolean;
+    espLogHighlight?: boolean;
+    onToggleEspLog?: () => void;
 }
 
 export const MacroBar: React.FC<MacroBarProps> = ({
     onExecuteCommand,
     connected,
+    espLogHighlight,
+    onToggleEspLog,
 }) => {
     const [macros, setMacros] = useState<Macro[]>(() => loadMacros());
     const [activeMacroId, setActiveMacroId] = useState<string | null>(null);
@@ -299,6 +303,29 @@ export const MacroBar: React.FC<MacroBarProps> = ({
                 >
                     &#8634;
                 </button>
+                {onToggleEspLog && (
+                    <button
+                        type="button"
+                        className="macro-action-btn"
+                        onClick={onToggleEspLog}
+                        title={
+                            espLogHighlight
+                                ? 'ESP Log & ANSI Highlighting: ON (Click to disable)'
+                                : 'ESP Log & ANSI Highlighting: OFF (Click to enable)'
+                        }
+                        style={
+                            espLogHighlight
+                                ? {
+                                      color: '#00e676',
+                                      borderColor: '#00e676',
+                                      fontWeight: 600,
+                                  }
+                                : undefined
+                        }
+                    >
+                        ⚡ ESP Log: {espLogHighlight ? 'ON' : 'OFF'}
+                    </button>
+                )}
             </div>
 
             <MacroModal

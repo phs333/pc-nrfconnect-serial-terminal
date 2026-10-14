@@ -19,6 +19,12 @@ import {
 import { selectedSerialNumber } from '@nordicsemiconductor/pc-nrfconnect-shared/src/Device/deviceSlice';
 
 import {
+    getConvertEol,
+    getEspLogHighlight,
+    setConvertEol,
+    setEspLogHighlight,
+} from '../../../app/store';
+import {
     getClearOnSend,
     getEchoOnShell,
     getLineEnding,
@@ -35,6 +41,12 @@ import { convertToDropDownItems } from '../../../utils/dataConstructors';
 import ExportLog from './ExportLog';
 
 export default () => {
+    const [espLogHighlight, setEspLogHighlightState] = React.useState(() =>
+        getEspLogHighlight(),
+    );
+    const [convertEol, setConvertEolState] = React.useState(() =>
+        getConvertEol(),
+    );
     const device = useSelector(selectedDevice);
     const serialPort = useSelector(getSerialPort);
     const lastModemOpenState = useRef(false);
@@ -191,6 +203,26 @@ export default () => {
                         label="Device controls echo"
                     />
                 )}
+            </Group>
+            <Group collapsible heading="ANSI Colors & Logs">
+                <Toggle
+                    title="Automatically colorize ESP-IDF (E, W, I, D, V), Zephyr, and panic crash dumps with vibrant ANSI colors"
+                    isToggled={espLogHighlight}
+                    onToggle={value => {
+                        setEspLogHighlightState(value);
+                        setEspLogHighlight(value);
+                    }}
+                    label="ESP-IDF & Zephyr Log Highlighting"
+                />
+                <Toggle
+                    title="Automatically convert line feeds (\n) to carriage return + line feed (\r\n) to prevent staircase indentation in microcontroller logs"
+                    isToggled={convertEol}
+                    onToggle={value => {
+                        setConvertEolState(value);
+                        setConvertEol(value);
+                    }}
+                    label="Convert Line Endings (convertEol)"
+                />
             </Group>
             <Group collapsible heading="Write to file">
                 <ExportLog />
