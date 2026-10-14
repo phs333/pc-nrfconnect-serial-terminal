@@ -98,17 +98,21 @@ export const MacroBar: React.FC<MacroBarProps> = ({
     const handleSaveMacro = (savedMacro: Macro) => {
         setMacros(prev => {
             const index = prev.findIndex(m => m.id === savedMacro.id);
-            if (index >= 0) {
-                const next = [...prev];
-                next[index] = savedMacro;
-                return next;
-            }
-            return [...prev, savedMacro];
+            const next =
+                index >= 0
+                    ? prev.map(m => (m.id === savedMacro.id ? savedMacro : m))
+                    : [...prev, savedMacro];
+            saveMacros(next);
+            return next;
         });
     };
 
     const handleDeleteMacro = (id: string) => {
-        setMacros(prev => prev.filter(m => m.id !== id));
+        setMacros(prev => {
+            const next = prev.filter(m => m.id !== id);
+            saveMacros(next);
+            return next;
+        });
     };
 
     const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,7 +127,11 @@ export const MacroBar: React.FC<MacroBarProps> = ({
                         `Import ${imported.length} macros? This will append to your current list.`,
                     )
                 ) {
-                    setMacros(prev => [...prev, ...imported]);
+                    setMacros(prev => {
+                        const next = [...prev, ...imported];
+                        saveMacros(next);
+                        return next;
+                    });
                 }
             }
         } catch (err) {
@@ -140,6 +148,7 @@ export const MacroBar: React.FC<MacroBarProps> = ({
     const handleResetDefaults = () => {
         if (window.confirm('Reset macro buttons to default presets?')) {
             setMacros(DEFAULT_MACROS);
+            saveMacros(DEFAULT_MACROS);
         }
     };
 

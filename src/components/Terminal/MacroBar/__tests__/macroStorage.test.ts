@@ -7,12 +7,22 @@
 import { DEFAULT_MACROS, loadMacros, saveMacros } from '../macroStorage';
 import { type Macro } from '../types';
 
+let mockStoreMacros: Macro[] | undefined;
+
+jest.mock('../../../../app/store', () => ({
+    getMacrosFromStore: jest.fn(() => mockStoreMacros),
+    setMacrosToStore: jest.fn((macros: Macro[]) => {
+        mockStoreMacros = macros;
+    }),
+}));
+
 describe('macroStorage', () => {
     beforeEach(() => {
+        mockStoreMacros = undefined;
         localStorage.clear();
     });
 
-    it('returns default macros when localStorage is empty', () => {
+    it('returns default macros when store and localStorage are empty', () => {
         const macros = loadMacros();
         expect(macros).toEqual(DEFAULT_MACROS);
     });
@@ -34,5 +44,11 @@ describe('macroStorage', () => {
         expect(loaded[0].name).toBe('Test Macro');
         expect(loaded[0].payload).toBe('AT\nAT+CSQ');
         expect(loaded[0].delayMs).toBe(200);
+    });
+
+    it('persists empty macro list when all macros are deleted', () => {
+        saveMacros([]);
+        const loaded = loadMacros();
+        expect(loaded).toEqual([]);
     });
 });

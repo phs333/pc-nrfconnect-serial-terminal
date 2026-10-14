@@ -11,10 +11,13 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { join } from 'path';
 
+import { type Macro } from '../components/Terminal/MacroBar/types';
+
 interface StoreSchema {
     pathToHistoryFile: string;
     maxNumberOfLinesInHistoryFile: number;
     scrollback: number;
+    macros?: Macro[];
 }
 
 const store = getPersistentStore<StoreSchema>({
@@ -57,3 +60,4 @@ export const setMaxNumberOfLinesInHistoryFile = (size: number) => {
 };
 
 export const [getScrollback, setScrollback] = fromStore('scrollback', 1000);
+export const [getMacrosFromStore, setMacrosToStore] = fromStore('macros');

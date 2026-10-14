@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { getMacrosFromStore, setMacrosToStore } from '../../../app/store';
 import { type Macro } from './types';
 
 const STORAGE_KEY = 'pc_nrfconnect_serial_macros';
@@ -34,20 +35,36 @@ export const DEFAULT_MACROS: Macro[] = [
 
 export const loadMacros = (): Macro[] => {
     try {
+        const stored = getMacrosFromStore();
+        if (Array.isArray(stored)) {
+            return stored;
+        }
+    } catch {
+        // Store not available or test environment
+    }
+
+    try {
         const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
+        if (stored !== null) {
             const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed) && parsed.length > 0) {
+            if (Array.isArray(parsed)) {
                 return parsed;
             }
         }
     } catch {
         // Fallback to default
     }
+
     return DEFAULT_MACROS;
 };
 
 export const saveMacros = (macros: Macro[]): void => {
+    try {
+        setMacrosToStore(macros);
+    } catch {
+        // Store not available
+    }
+
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(macros));
     } catch {
