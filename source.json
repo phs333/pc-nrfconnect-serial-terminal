@@ -1,0 +1,7 @@
+{
+    "name": "phs333-source",
+    "description": "Custom nRF Connect Apps by phs333",
+    "apps": [
+        "https://raw.githubusercontent.com/phs333/pc-nrfconnect-serial-terminal/main/pc-nrfconnect-serial-terminal.json"
+    ]
+}
