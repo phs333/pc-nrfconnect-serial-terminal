@@ -8,7 +8,7 @@ The Serial Terminal app allows you to connect to serial devices.
 > sending pre-configured multi-line serial command blocks with configurable line
 > delays, color tags, and JSON import/export!
 
-![screenshot](resources/screenshoot.gif)
+![Macro Buttons in Action](resources/macro-buttons.gif)
 
 ## Macro Buttons Features
 
@@ -18,12 +18,6 @@ The Serial Terminal app allows you to connect to serial devices.
 - **Edit & Delete:** Click the edit icon (`✎`) or right-click any macro.
 - **Import / Export JSON:** Share macro presets with teammates.
 - **Abort / Stop:** Cancel execution of long-running multi-line macros easily.
-
-### Video Demonstration
-
-See the macro buttons in action:
-
-[▶️ Watch Demo Video](resources/macro-buttons-demo.mp4)
 
 ## Installation
 
