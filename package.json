@@ -24,6 +24,7 @@
     "main": "dist/bundle.js",
     "files": [
         "dist/",
+        "!dist/*.map",
         "resources/icon.*",
         "resources/screenshoot.gif",
         "LICENSE",
@@ -33,8 +34,8 @@
         "watch": "run-p --silent --continue-on-error watch:*",
         "watch:build": "run-esbuild --watch",
         "watch:types": "tsc --noEmit --pretty --watch --preserveWatchOutput",
-        "build:dev": "run-esbuild",
-        "build:prod": "run-esbuild --prod",
+        "build:dev": "run-esbuild && node ./scripts/patch-index-html.js",
+        "build:prod": "run-esbuild --prod && node ./scripts/patch-index-html.js",
         "test": "jest --passWithNoTests",
         "check": "run-p --silent --continue-on-error --print-label check:*",
         "check:lint": "eslint --color .",
