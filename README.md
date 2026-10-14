@@ -27,14 +27,26 @@ See the macro buttons in action:
 
 ## Installation
 
-### From Pre-built Package (`.tgz`)
+### Via nRF Connect Source JSON (Recommended)
 
-1. Download `pc-nrfconnect-serial-terminal-1.7.0.tgz` from Releases.
 1. Open **nRF Connect for Desktop**.
-1. Go to **Settings > Apps > Install from local file** and select the `.tgz`.
-1. Alternatively, copy the `.tgz` to:
-    - **Windows:** `%USERPROFILE%\.nrfconnect-apps\local\`
-    - **Linux / macOS:** `~/.nrfconnect-apps/local/`
+1. Click the **Settings (gear icon)**.
+1. In the **Apps** or **Sources** section, add the following Source URL:
+    ```text
+    https://raw.githubusercontent.com/phs333/pc-nrfconnect-serial-terminal/main/source.json
+    ```
+1. Click **Add source**.
+1. On the main apps list, locate **Serial Terminal (with Macros)** and click
+   **Install** (or **Open**).
+
+### Manual / Local Folder Installation
+
+1. Copy or extract the app folder into:
+    - **Windows:**
+      `%USERPROFILE%\.nrfconnect-apps\local\pc-nrfconnect-serial-terminal`
+    - **Linux / macOS:**
+      `~/.nrfconnect-apps/local/pc-nrfconnect-serial-terminal`
+1. Restart **nRF Connect for Desktop**.
 
 ### Official App
 
