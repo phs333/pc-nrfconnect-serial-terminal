@@ -19,6 +19,12 @@ The Serial Terminal app allows you to connect to serial devices.
 - **Import / Export JSON:** Share macro presets with teammates.
 - **Abort / Stop:** Cancel execution of long-running multi-line macros easily.
 
+### Video Demonstration
+
+See the macro buttons in action:
+
+[▶️ Watch Demo Video](resources/macro-buttons-demo.mp4)
+
 ## Installation
 
 ### From Pre-built Package (`.tgz`)

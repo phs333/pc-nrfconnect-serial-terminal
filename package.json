@@ -24,7 +24,8 @@
     "main": "dist/bundle.js",
     "files": [
         "dist/",
-        "resources/*",
+        "resources/icon.*",
+        "resources/screenshoot.gif",
         "LICENSE",
         "Changelog.md"
     ],
